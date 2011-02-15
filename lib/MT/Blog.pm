@@ -46,7 +46,6 @@ __PACKAGE__->install_properties( {
            'require_comment_emails'    => 'boolean',
            'junk_folder_expiry'        => 'integer',
            'ping_weblogs'              => 'boolean',
-           'mt_update_key'             => 'string(30)',
            'language'                  => 'string(5)',
            'welcome_msg'               => 'text',
            'google_api_key'            => 'string(32)',
@@ -633,7 +632,6 @@ sub clone_with_children {
     #    Placement records
     #    Template records
     #    Permission records
-    #    IPBanList records???
     #    Notification records???
 
     my $new_blog_id;
@@ -1408,11 +1406,6 @@ The number of words in an auto-generated excerpt.
 
 A boolean flag specifying whether the system should send an XML-RPC ping to
 I<weblogs.com> after an entry is saved.
-
-=item * mt_update_key
-
-The Movable Type Recently Updated Key to be sent to I<movabletype.org> after
-an entry is saved.
 
 =item * language
 

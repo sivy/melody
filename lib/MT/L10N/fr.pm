@@ -489,7 +489,7 @@ use vars qw( @ISA %Lexicon );
     'Learn more about OpenID' => 'Apprenez-en plus à propos d\'OpenID',
 
 ## default_templates/powered_by.mtml
-    '_MTCOM_URL' => 'http://www.movabletype.com/',
+    '_MTCOM_URL' => 'http://openmelody.org/',
 
 ## default_templates/tag_cloud.mtml
 
@@ -509,10 +509,6 @@ use vars qw( @ISA %Lexicon );
 ## default_templates/recent_assets.mtml
 
 ## default_templates/monthly_entry_listing.mtml
-
-## lib/MT/IPBanList.pm
-    'IP Ban'  => 'Interdiction IP',
-    'IP Bans' => 'Interdictions IP',
 
 ## lib/MT/BasicAuthor.pm
     'authors' => 'auteurs',
@@ -1574,24 +1570,12 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorMonthly.pm
     'AUTHOR-MONTHLY_ADV' => 'par auteurs et semaines',
-    'author/author-display-name/yyyy/mm/index.html' =>
-      'auteur/auteur-nom-affichage/aaaa/mm/index.html',
-    'author/author_display_name/yyyy/mm/index.html' =>
-      'auteur/auteur_nom_affichage/aaaa/mm/index.html',
 
 ## lib/MT/ArchiveType/AuthorWeekly.pm
     'AUTHOR-WEEKLY_ADV' => 'par auteurs et années',
-    'author/author-display-name/yyyy/mm/day-week/index.html' =>
-      'auteur/auteur-nom-affichage/aaaa/mm/jour-semaine/index.html',
-    'author/author_display_name/yyyy/mm/day-week/index.html' =>
-      'auteur/auteur_nom_affichage/aaaa/mm/jour-semaine/index.html',
 
 ## lib/MT/ArchiveType/AuthorDaily.pm
     'AUTHOR-DAILY_ADV' => 'par auteurs et jours',
-    'author/author-display-name/yyyy/mm/dd/index.html' =>
-      'auteur/afficher-nom-auteur/aaaa/mm/jj/index.html',
-    'author/author_display_name/yyyy/mm/dd/index.html' =>
-      'auteur/afficher_nom_auteur/aaaa/mm/jj/index.html',
 
 ## lib/MT/ArchiveType/Individual.pm
     'INDIVIDUAL_ADV'              => 'par notes',
@@ -1625,10 +1609,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorYearly.pm
     'AUTHOR-YEARLY_ADV' => 'par auteurs et années',
-    'author/author-display-name/yyyy/index.html' =>
-      'auteur/auteur-nom-affichage/aaaa/index.html',
-    'author/author_display_name/yyyy/index.html' =>
-      'auteur/auteur_nom_affichage/aaaa/index.html',
 
 ## lib/MT/ArchiveType/Monthly.pm
     'MONTHLY_ADV'        => 'mensuelles',
@@ -1658,10 +1638,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/Author.pm
     'AUTHOR_ADV' => 'par auteurs',
-    'author/author-display-name/index.html' =>
-      'auteur/auteur-nom-affichage/index.html',
-    'author/author_display_name/index.html' =>
-      'auteur/auteur_nom_affichage/index.html',
 
 ## lib/MT/ArchiveType/CategoryYearly.pm
     'CATEGORY-YEARLY_ADV' => 'par catégories et années',
@@ -2432,11 +2408,6 @@ use vars qw( @ISA %Lexicon );
       'Les notes doivent être dupliquées si les trackbacks le sont'
     ,                                               # Translate - New
 
-## lib/MT/CMS/BanList.pm
-    'You did not enter an IP address to ban.' =>
-      'Vous devez saisir une adresse IP à bannir.',
-    'The IP you entered is already banned for this blog.' =>
-      'L\'adresse IP saisie est déjà bannie pour ce blog.',
 
 ## lib/MT/CMS/Plugin.pm
     'Plugin Set: [_1]'   => 'Éventail de plugins : [_1]',
@@ -4841,18 +4812,6 @@ use vars qw( @ISA %Lexicon );
     'Action Bars' => 'Barres de tâches',
     'Select the location of the entry editor&rsquo;s action bar.' =>
       'Sélectionner l\'emplacement de la barre d\'action de l\'éditeur de note.',
-
-## tmpl/cms/list_banlist.tmpl
-    'IP Banning Settings' => 'Paramètres des IP bannies',
-    'IP addresses'        => 'Adresses IP',
-    'Delete selected IP Address (x)' =>
-      'Effacer les adresses IP sélectionnées (x)',
-    'You have added [_1] to your list of banned IP addresses.' =>
-      'L\'adresse [_1] a été ajoutée à la liste des adresses IP bannies.',
-    'You have successfully deleted the selected IP addresses from the list.'
-      => 'L\'adresse IP sélectionnée a été supprimée de la liste.',
-    'Ban IP Address' => 'Bannir l\'adresse IP',
-    'Date Banned'    => 'Bannie le :',
 
 ## tmpl/cms/cfg_registration.tmpl
     'Registration Settings' => 'Paramètres des enregistrements',

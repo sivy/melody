@@ -383,7 +383,7 @@ sub numerate {
       '<a href="[_2]">Архивы</a> [_1]',
 
 ## default_templates/powered_by.mtml
-    '_MTCOM_URL' => 'http://www.movabletype.com/',
+    '_MTCOM_URL' => 'http://openmelody.org/',
 
 ## default_templates/category_archive_list.mtml
 
@@ -1549,10 +1549,6 @@ sub numerate {
 
 ## lib/MT/ArchiveType/AuthorMonthly.pm
     'AUTHOR-MONTHLY_ADV' => 'авторов по месяцам',
-    'author/author-display-name/yyyy/mm/index.html' =>
-      'автор/отображаемое-имя/гггг/мм/index.html',
-    'author/author_display_name/yyyy/mm/index.html' =>
-      'автор/отображаемое_имя/гггг/мм/index.html',
 
 ## lib/MT/ArchiveType/Monthly.pm
     'MONTHLY_ADV'        => 'по месяцам',
@@ -1603,17 +1599,9 @@ sub numerate {
 
 ## lib/MT/ArchiveType/Author.pm
     'AUTHOR_ADV' => 'авторов',
-    'author/author-display-name/index.html' =>
-      'автор/отображаемое-имя/index.html',
-    'author/author_display_name/index.html' =>
-      'автор/отображаемое_имя/index.html',
 
 ## lib/MT/ArchiveType/AuthorYearly.pm
     'AUTHOR-YEARLY_ADV' => 'авторов по годам',
-    'author/author-display-name/yyyy/index.html' =>
-      'автор/отображаемое-имя/гггг/index.html',
-    'author/author_display_name/yyyy/index.html' =>
-      'автор/отображаемое_имя/гггг/index.html',
 
 ## lib/MT/ArchiveType/Weekly.pm
     'WEEKLY_ADV' => 'по неделям',
@@ -1622,10 +1610,6 @@ sub numerate {
 
 ## lib/MT/ArchiveType/AuthorWeekly.pm
     'AUTHOR-WEEKLY_ADV' => 'авторов по неделям',
-    'author/author-display-name/yyyy/mm/day-week/index.html' =>
-      'автор/отображаемое-имя/гггг/мм/день-недели/index.html',
-    'author/author_display_name/yyyy/mm/day-week/index.html' =>
-      'автор/отображаемое_имя/гггг/мм/день-недели/index.html',
 
 ## lib/MT/ArchiveType/CategoryMonthly.pm
     'CATEGORY-MONTHLY_ADV' => 'категорий по месяцам',
@@ -1650,10 +1634,6 @@ sub numerate {
 
 ## lib/MT/ArchiveType/AuthorDaily.pm
     'AUTHOR-DAILY_ADV' => 'авторов по дням',
-    'author/author-display-name/yyyy/mm/dd/index.html' =>
-      'автор/отображаемое-имя/гггг/мм/дд/index.html',
-    'author/author_display_name/yyyy/mm/dd/index.html' =>
-      'автор/отображаемое_имя/гггг/мм/дд/index.html',
 
 ## lib/MT/Config.pm
     'Configuration' => 'Конфигурация',
@@ -2000,11 +1980,6 @@ sub numerate {
     'Tag \'[_1]\' (ID:[_2]) deleted by \'[_3]\'' =>
       'Тег «[_1]» (ID:[_2]) удалён пользователм «[_3]»',
 
-## lib/MT/CMS/BanList.pm
-    'You did not enter an IP address to ban.' =>
-      'Вы не ввели IP адрес, который хотите заблокировать.',
-    'The IP you entered is already banned for this blog.' =>
-      'Введённый IP уже заблокирован в этом блоге.',
 
 ## lib/MT/CMS/Tools.pm
     'Password Recovery' => 'Восстановление пароля',
@@ -2956,10 +2931,6 @@ sub numerate {
     'Job' => 'Задача',
 
 ## lib/MT/Trackback.pm
-
-## lib/MT/IPBanList.pm
-    'IP Ban'  => 'Блокировка IP',
-    'IP Bans' => 'Блокировка IP',
 
 ## lib/MT/Mail.pm
     'Unknown MailTransfer method \'[_1]\'' =>
@@ -4553,19 +4524,6 @@ sub numerate {
     'Members'             => 'Пользователи',
     'Role Is Active'      => 'Роль активна',
     'Role Not Being Used' => 'Роль не используется',
-
-## tmpl/cms/list_banlist.tmpl
-    'IP Banning Settings' =>
-      'Параметры заблокированных IP',
-    'IP addresses' => 'IP адреса',
-    'Delete selected IP Address (x)' =>
-      'Удалить выбранные IP адреса (x)',
-    'You have added [_1] to your list of banned IP addresses.' =>
-      'Адрес [_1] добавлен в список заблокированных IP адресов.',
-    'You have successfully deleted the selected IP addresses from the list.'
-      => 'Выбранные IP адреса удалены из списка.',
-    'Ban IP Address' => 'Заблокировать IP адрес',
-    'Date Banned'    => 'Дата блокировки:',
 
 ## tmpl/cms/dialog/new_password.tmpl
     'Choose New Password' => 'Выберите новый пароль',

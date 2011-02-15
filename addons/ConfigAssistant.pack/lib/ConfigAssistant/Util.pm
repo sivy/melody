@@ -3,9 +3,11 @@ package ConfigAssistant::Util;
 use strict;
 use warnings;
 use base 'Exporter';
-our @EXPORT_OK = qw( find_theme_plugin   find_template_def   find_option_def
-  find_option_plugin  process_file_upload
-  ERROR SUCCESS OVERWRITE NO_UPLOAD );
+our @EXPORT_OK
+  = qw( find_theme_plugin   find_template_def   find_option_def
+        find_option_plugin  process_file_upload 
+        plugin_static_web_path plugin_static_file_path
+        ERROR SUCCESS OVERWRITE NO_UPLOAD );
 
 use MT::Util qw( encode_url );
 
@@ -13,6 +15,20 @@ sub ERROR ()     {0}
 sub SUCCESS ()   {1}
 sub OVERWRITE () {2}
 sub NO_UPLOAD () {3}
+
+sub plugin_static_web_path {
+    my ($plugin) = @_;
+    my $url = MT->instance->static_path;
+    $url .= '/' unless $url =~ m!/$!;
+    $url .= 'support/plugins/' . $plugin->id . '/';
+    return $url;
+}
+
+sub plugin_static_file_path {
+    my ($plugin) = @_;
+    return File::Spec->catdir( MT->instance->static_file_path,
+                               'support', 'plugins', $plugin->id );
+}
 
 sub process_file_upload {
     my $app = shift;
@@ -44,9 +60,9 @@ sub process_file_upload {
     my $has_overwrite = $q->param('overwrite_yes')
       || $q->param('overwrite_no');
     my %param = (
-                  middle_path => $q->param('middle_path'),
-                  site_path   => $q->param('site_path'),
-                  extra_path  => $q->param('extra_path'),
+                  middle_path => $q->param('middle_path') || '',
+                  site_path   => $q->param('site_path') || '',
+                  extra_path  => $q->param('extra_path') || '',
                   upload_mode => $app->mode,
     );
     return {
@@ -107,9 +123,8 @@ sub process_file_upload {
         $root_path = $app->blog->site_path;
         $base_url  = $app->blog->site_url;
         $fmgr      = $app->blog->file_mgr;
-        $blog_id   = $app->blog
-          ->id;    # the resulting asset will be added to this context
-        $format = '%r';
+        $blog_id   = $app->blog->id;    # the resulting asset will be added to this context
+        $format    = '%r';
 
     }
     elsif ( lc($scope) eq 'archive' ) {
@@ -123,8 +138,7 @@ sub process_file_upload {
         $root_path = $app->blog->archive_path;
         $base_url  = $app->blog->archive_url;
         $fmgr      = $app->blog->file_mgr;
-        $blog_id   = $app->blog
-          ->id;    # the resulting asset will be added to this context
+        $blog_id   = $app->blog->id;    # the resulting asset will be added to this context
         $format = '%a';
 
     }
@@ -133,8 +147,8 @@ sub process_file_upload {
         $root_path = File::Spec->catdir( $app->static_file_path, 'support' );
         $base_url  = $app->static_path . '/support';
         $fmgr      = MT::FileMgr->new('Local');
-        $blog_id = 0;    # the resulting asset will be added to this context
-        $format = File::Spec->catfile( '%s', 'support' );
+        $blog_id   = $app->blog ? $app->blog->id : 0;  # the resulting asset will be added to this context
+        $format    = File::Spec->catfile( '%s', 'support' );
 
     }
     else {
@@ -291,7 +305,15 @@ sub process_file_upload {
         $asset->image_width($w);
         $asset->image_height($h);
     }
-    $asset->save;
+    $asset->save
+        or return {
+            status => ERROR(),
+            message =>
+                $app->translate(
+                    "Error saving asset: [_1]",
+                    $asset->errstr
+                )
+      };
     $app->run_callbacks( 'cms_post_save.asset', $app, $asset, $original );
 
     if ($is_image) {
@@ -349,7 +371,6 @@ sub process_file_upload {
                              blog  => $blog
         );
     }
-
     return {
           status => SUCCESS(),
           asset => { id => $asset->id, url => $asset->url, object => $asset },

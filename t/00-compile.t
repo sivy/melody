@@ -7,7 +7,7 @@ use warnings;
 use lib 't/lib', 'lib', 'extlib';
 use MT::Test;
 
-use Test::More tests => 179;
+use Test::More tests => 178;
 
 use_ok('MT::Bootstrap');
 use_ok('MT::ErrorHandler');
@@ -29,7 +29,6 @@ use_ok('MT::CMS::Plugin');
 use_ok('MT::CMS::Asset');
 use_ok('MT::CMS::Entry');
 use_ok('MT::CMS::Search');
-use_ok('MT::CMS::BanList');
 use_ok('MT::CMS::Export');
 use_ok('MT::CMS::Tag');
 use_ok('MT::CMS::Blog');
@@ -66,7 +65,6 @@ use_ok('MT::Auth::BasicAuth');
 use_ok('MT::Auth::LiveJournal');
 use_ok('MT::Auth::OpenID');
 use_ok('MT::Auth::TypeKey');
-use_ok('MT::Auth::Vox');
 
 # MT::Objects
 use_ok('MT::Object');
@@ -83,7 +81,6 @@ use_ok('MT::Placement');
 use_ok('MT::Category');
 use_ok('MT::Comment');
 use_ok('MT::Entry');
-use_ok('MT::IPBanList');
 use_ok('MT::FileInfo');
 use_ok('MT::Config');
 use_ok('MT::Asset');

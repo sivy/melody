@@ -19,14 +19,13 @@ our ( $PRODUCT_NAME, $PRODUCT_CODE, $PRODUCT_VERSION, $VERSION_ID,
       $PORTAL_URL );
 our ( $MT_DIR, $APP_DIR, $CFG_DIR, $CFG_FILE, $SCRIPT_SUFFIX );
 our (
-      $plugin_sig, $plugin_envelope, $plugin_registry,
-      %Plugins,    @Components,      %Components,
-      $DebugMode,  $mt_inst,         %mt_inst
+      $plugin_sig,      %Plugins,    @Components,     $mt_inst,
+      $plugin_envelope, $DebugMode,  %Components,     %mt_inst,
+      $plugin_registry, %CallbackAlias, $plugins_installed
 );
-my %Text_filters;
+my ( %Text_filters, $plugin_full_path, %CallbacksEnabled, @Callbacks );
 
-# For state determination in MT::Object
-our $plugins_installed;
+our $CallbacksEnabled = 1;
 
 BEGIN {
     $plugins_installed = 0;
@@ -43,17 +42,17 @@ BEGIN {
         # different version and their uses and the version module POD
         # for details about the next line and its semantics:
         # http://search.cpan.org/~jpeacock/version-0.85/lib/version.pod
-        use version 0.77; our $VERSION = version->declare("v0.9.31");
+        use version 0.77; our $VERSION = version->declare("v0.9.32");
 
         # MakeMaker stops at the line above, so NOW, we swap the $VERSION
         # to $PRODUCT_VERSION and assign $VERSION
 
         $PRODUCT_VERSION = $VERSION;    # The rightful resting place
         $VERSION         = '4.35';      # The true API version
-        $SCHEMA_VERSION  = '4.0077';
+        $SCHEMA_VERSION  = '4.0078';
         $PRODUCT_NAME    = 'Melody';
         $PRODUCT_CODE    = 'OM';
-        $VERSION_ID      = '1.0.0b2 (build 31)';
+        $VERSION_ID      = '1.0.0b3 (build 32)';
         $PORTAL_URL      = 'http://openmelody.org';
     } ## end if ( '__MAKE_ME__' eq ...)
     else {
@@ -558,8 +557,6 @@ sub log {
 
 } ## end sub log
 
-my $plugin_full_path;
-
 sub run_tasks {
     my $mt = shift;
     require MT::TaskMgr;
@@ -567,15 +564,18 @@ sub run_tasks {
 }
 
 sub add_plugin {
-    my $class = shift;
+    my $class    = shift;
     my ($plugin) = @_;
+    my $sig      = $plugin_sig            || $plugin->{sig};
+    my $name     = eval { $plugin->name } || $plugin->{name};
 
     if ( ref $plugin eq 'HASH' ) {
         require MT::Plugin;
         $plugin = new MT::Plugin($plugin);
     }
-    $plugin->{name} ||= $plugin_sig;
-    $plugin->{plugin_sig} = $plugin_sig;
+
+    $plugin->{name}      ||= $name || $plugin_sig;
+    $plugin->{plugin_sig}  = $plugin_sig;
 
     my $id = $plugin->id;
     unless ($plugin_envelope) {
@@ -584,19 +584,21 @@ sub add_plugin {
         return;
     }
     $plugin->envelope($plugin_envelope);
+
     Carp::confess(
         "You cannot register multiple plugin objects from a single script. $plugin_sig"
       )
       if exists( $Plugins{$plugin_sig} )
           && ( exists $Plugins{$plugin_sig}{object} );
 
-    $Components{ lc $id } = $plugin if $id;
+    $Components{ lc $id }         = $plugin if $id;
     $Plugins{$plugin_sig}{object} = $plugin;
-    $plugin->{full_path} = $plugin_full_path;
+    $plugin->{full_path}          = $plugin_full_path;
     $plugin->path($plugin_full_path);
-    unless ( $plugin->{registry} && ( %{ $plugin->{registry} } ) ) {
-        $plugin->{registry} = $plugin_registry;
-    }
+    
+    $plugin->{registry} = $plugin_registry
+        unless eval { keys %{ $plugin->{registry} } };
+
     if ( $plugin->{registry} ) {
         if ( my $settings = $plugin->{registry}{config_settings} ) {
             $settings = $plugin->{registry}{config_settings} = $settings->()
@@ -626,11 +628,6 @@ sub add_plugin {
     push @Components, $plugin;
     1;
 } ## end sub add_plugin
-
-our %CallbackAlias;
-our $CallbacksEnabled = 1;
-my %CallbacksEnabled;
-my @Callbacks;
 
 sub add_callback {
     my $class = shift;
@@ -730,9 +727,12 @@ sub register_callbacks {
     1;
 }
 
-our $CB_ERR;
-sub callback_error { $CB_ERR = $_[0]; }
-sub callback_errstr {$CB_ERR}
+{    
+    our $CB_ERR;
+    # TODO Convert function to method in appropriate package
+    sub callback_error { $CB_ERR = $_[0]; }
+    sub callback_errstr {$CB_ERR}
+}
 
 sub run_callback {
     my $class = shift;
@@ -752,12 +752,11 @@ sub run_callback {
         if ( $cb->{internal} ) {
             $name = "Internal callback";
         }
-        elsif ( UNIVERSAL::isa( $plugin, 'MT::Plugin' ) ) {
-            $name = $plugin->name() || $mt->translate("Unnamed plugin");
+        elsif ( blessed $plugin and $plugin->isa( 'MT::Component' )) {
+            $name = $plugin->name();
         }
-        else {
-            $name = $mt->translate("Unnamed plugin");
-        }
+        $name ||= $mt->translate("Unnamed plugin");
+
         $mt->log( {
                     message =>
                       $mt->translate( "[_1] died with: [_2]", $name, $err ),
@@ -848,6 +847,7 @@ sub run_callbacks {
         }
     }
 
+    # TODO Convert to method in appropriate package
     callback_error( join( '', @errors ) );
 
     $CallbacksEnabled{$_} = 1 for @methods;
@@ -1002,6 +1002,15 @@ sub init_config {
             }
         }
     } ## end for my $meth (@mt_paths)
+
+    if ( my $local_lib = $cfg->PerlLocalLibPath ) {
+        $local_lib = [ $local_lib ] if ! 'ARRAY' eq ref $local_lib;
+        eval "use local::lib qw( @{$local_lib} )";
+        return $mt->trans_error(
+            'Can\'t load local lib from path [_1]: ',
+            join(', ', @$local_lib),
+            $@, ) if $@;
+    }
 
     return $mt->trans_error("Bad ObjectDriver config")
       unless $cfg->ObjectDriver;
@@ -1418,7 +1427,6 @@ sub upload_file_to_sync {
     MT::TheSchwartz->insert($job);
 } ## end sub upload_file_to_sync
 
-# use Data::Dumper;
 sub init_addons {
     my $mt     = shift;
     my $cfg    = $mt->config;
@@ -1451,74 +1459,13 @@ sub _init_plugins_core {
         $timer = $mt->get_timer();
     }
 
-    # TODO Refactor/abstract this load_plugin anonymous subroutine out of here
-    # For testing purposes and maintainability, we need to make it a point
-    # to continually make large methods like this smaller and more focused.
-    my $load_plugin = sub {
-        my ( $plugin, $sig ) = @_;
-        die "Bad plugin filename '$plugin'"
-          if ( $plugin !~ /^([-\\\/\@\:\w\.\s~]+)$/ );
-        local $plugin_sig      = $plugin->{sig};
-        local $plugin_registry = {};
-        $plugin = $1;
-        if (
-             !$use_plugins
-             || ( exists $PluginSwitch->{$plugin_sig}
-                  && !$PluginSwitch->{$plugin_sig} )
-          )
-        {
-            $Plugins{$plugin_sig}{full_path} = $plugin_full_path;
-            $Plugins{$plugin_sig}{enabled}   = 0;
-            return 0;
-        }
-        return 0 if exists $Plugins{$plugin_sig};
-        $Plugins{$plugin_sig}{full_path} = $plugin_full_path;
-        $timer->pause_partial if $timer;
-        eval "# line " 
-          . __LINE__ . " " 
-          . __FILE__
-          . "\nrequire '"
-          . $plugin_full_path . "';";
-        $timer->mark( "Loaded plugin " . $sig ) if $timer;
-        if ($@) {
-            $Plugins{$plugin_sig}{error} = $@;
-
-            # Log the issue but do it in a post_init callback so
-            # that we won't prematurely initialize the schema before
-            # all plugins are finished loading
-            my $msg = $mt->translate( "Plugin error: [_1] [_2]",
-                                      $plugin, $Plugins{$plugin_sig}{error} );
-            $mt->log(
-                  { message => $msg, class => 'system', level => 'ERROR', } );
-            return 0;
-        }
-        else {
-            if ( my $obj = $Plugins{$plugin_sig}{object} ) {
-                $obj->init_callbacks();
-            }
-            else {
-
-                # A plugin did not register itself, so
-                # create a dummy plugin object which will
-                # cause it to show up in the plugin listing
-                # by it's filename.
-                MT->add_plugin( {} );
-            }
-        }
-        $Plugins{$plugin_sig}{enabled} = 1;
-        return 1;
-    };    # end load_plugin sub
-
-
     my @deprecated_perl_init = ();
     foreach my $plugin (@$plugins) {
 
         # TODO in Melody 1.1: do NOT load plugin, .pl is deprecated
         if ( $plugin->{file} =~ /\.pl$/ ) {
             push( @deprecated_perl_init, $plugin );
-            $plugin_envelope  = $plugin->{envelope};
-            $plugin_full_path = $plugin->{path};
-            $load_plugin->( $plugin->{path}, $plugin->{file} );
+            $mt->load_perl_plugin( $plugin );
         }
         else {
             my $pclass
@@ -1576,7 +1523,7 @@ sub _init_plugins_core {
     if (@deprecated_perl_init) {
         MT->add_callback(
             'post_init',
-            1, undef,
+            1, $mt,
             sub {
                 MT->_perl_init_plugin_warnings(@deprecated_perl_init);
             }
@@ -1591,6 +1538,93 @@ sub _init_plugins_core {
 
     1;
 } ## end sub _init_plugins_core
+
+#   Documenting the silly variations of the exact same thing.  These should
+#   simply be transformations lazily rendered and cached
+#
+#   base     - The absolute filesystem path to the plugin's top-level folder.
+#              Example: /var/www/cgi/mt/plugins/MyPlugin
+#
+#   dir      - The name of the plugin's top-level folder.
+#              Transformation: File::Basename::basename( $plugin->{base} )
+#              Example: ConfigAssistant.pack
+#
+#   envelope - For PluginPath's within the Melody application folder, this is
+#              the relative path from the Melody directory to the plugin's
+#              top-level folder.  (WHAT ABOUT OUTSIDE OF MELODY DIR?)
+#              Transformation: ( $plugin->{envelope} = $plugin->{base} )
+#                                           =~ s!$ENV{MT_HOME}/?!!;
+#              Examples:
+#              *    addons/ConfigAssistant.pack
+#              *    plugins/FieldDay
+#
+#   sig      - The path to the yaml/perl initialization file from the
+#              perspective of its plugin directory. Examples: 
+#              Transformation:  $plugin->{dir} + init_file
+#              *    ConfigAssistant.pack/config.yaml
+#              *    Log4MT.plugin/config.yaml
+#              *    Log4MT.plugin/config.yaml
+#              *    MT-OldPlugin/OldPlugin.pl
+#   
+sub load_perl_plugin {
+    my $mt = shift;
+    my ( $plugin ) = @_;
+    die "Bad plugin filename '".$plugin->{file}."'"
+      if ( $plugin->{file} !~ /^([-\\\/\@\:\w\.\s~]+)$/ );
+    my $timer = undef;                       # FIXME JAY Had to disable timer
+    my $sig   = $plugin_sig = $plugin->{sig};
+    $plugin_full_path
+        = File::Spec->catfile( $plugin->{path}, $plugin->{file} );
+    # local $plugin_registry = {};
+    # FIXME JAY Temporarily disabled this check, uses more fucking globals
+    # if (
+    #      !$use_plugins
+    #      || ( exists $PluginSwitch->{$sig}
+    #           && !$PluginSwitch->{$sig} )
+    #   )
+    # {
+    #     $Plugins{$sig}{full_path} = $plugin_full_path;
+    #     $Plugins{$sig}{enabled}   = 0;
+    #     return 0;
+    # }
+    return 0 if exists $Plugins{$sig};
+    $Plugins{$sig}{full_path} = $plugin_full_path;
+    $timer->pause_partial if $timer;
+    eval "# line " 
+      . __LINE__ . " " 
+      . __FILE__
+      . "\nrequire '"
+      . $plugin_full_path . "';";
+    $timer->mark( "Loaded plugin " . $plugin->{sig} ) if $timer;
+    if ($@) {
+        $Plugins{$sig}{error} = $@;
+
+        # Log the issue but do it in a post_init callback so
+        # that we won't prematurely initialize the schema before
+        # all plugins are finished loading
+        my $msg = $mt->translate( "Plugin error: [_1] [_2]",
+                                  $plugin, $Plugins{$sig}{error} );
+        $mt->log(
+              { message => $msg, class => 'system', level => 'ERROR', } );
+        return 0;
+    }
+    else {
+        if ( my $obj = $Plugins{$sig}{object} ) {
+            $obj->init_callbacks();
+        }
+        else {
+
+            # A plugin did not register itself, so
+            # create a dummy plugin object which will
+            # cause it to show up in the plugin listing
+            # by it's filename.
+            MT->add_plugin( {} );
+        }
+    }
+    $Plugins{$sig}{enabled} = 1;
+    return 1;
+};    # end load_plugin sub
+
 
 ###
 ### FIXME Handle perl plugin deprecation properly
@@ -1622,6 +1656,7 @@ sub _perl_init_plugin_warnings {
     # We need to be more sensitive about the activity log...
     # Get the session storing the last warning for perl-init plugins
     # If it's over a day old, it doesn't exist.
+
     require MT::Session;
     my $sess_terms = {
                        id => 'Deprecation warning: Perl initialized plugins',
@@ -1672,26 +1707,28 @@ sub _perl_init_plugin_warnings {
     } ## end if ($needs_warning)
 } ## end sub _perl_init_plugin_warnings
 
-my %addons;
+{
+    my %addons;
 
-sub find_addons {
-    my $mt = shift;
-    my ($type) = @_;
-    unless (%addons) {
-        my @PluginPaths;
-        my $cfg = $mt->config;
-        unshift @PluginPaths, File::Spec->catdir( $MT_DIR, 'addons' );
-        unshift @PluginPaths, $cfg->PluginPath;
-        foreach my $PluginPath (@PluginPaths) {
-            __merge_hash( \%addons,
-                          $mt->scan_directory_for_addons($PluginPath) );
+    sub find_addons {
+        my $mt = shift;
+        my ($type) = @_;
+        unless (%addons) {
+            my @PluginPaths;
+            my $cfg = $mt->config;
+            unshift @PluginPaths, File::Spec->catdir( $MT_DIR, 'addons' );
+            unshift @PluginPaths, $cfg->PluginPath;
+            foreach my $PluginPath (@PluginPaths) {
+                __merge_hash( \%addons,
+                              $mt->scan_directory_for_addons($PluginPath) );
+            }
         }
+        if ($type) {
+            my $addons = $addons{$type} ||= [];
+            return $addons;
+        }
+        return 1;
     }
-    if ($type) {
-        my $addons = $addons{$type} ||= [];
-        return $addons;
-    }
-    return 1;
 }
 
 sub scan_directory_for_addons {
@@ -1708,23 +1745,17 @@ sub scan_directory_for_addons {
         for my $plugin_dir (@p) {
             next if ( $plugin_dir =~ /^\.\.?$/ || $plugin_dir =~ /~$/ );
 
-            # Legacy support when plugins were not
-            # placed in their own directory
             $plugin_full_path
               = File::Spec->catfile( $PluginPath, $plugin_dir );
             if ( -f $plugin_full_path ) {
                 if ( $plugin_full_path =~ /\.pl$/ ) {
-                    push @{ $plugins{'plugin'} },
-                      {
-                        dir      => $PluginPath,
-                        file     => $plugin_dir,
-                        path     => $plugin_full_path,
-                        envelope => $plugin_lastdir,
-                      };
+                    warn "Plugins without envelopes are no longer loaded in "
+                        ."Melody: $plugin_full_path";
+                    # Yes, that's all you get.  Don't ask for more...
+                    next;
                 }
             }
             else {
-
                 # open and scan the directory for plugin files,
                 # save them to load later. Report errors in
                 # the activity log
@@ -1784,8 +1815,8 @@ sub scan_directory_for_addons {
                     my $plugin_file
                       = File::Spec->catfile( $plugin_full_path, $file );
                     if ( -f $plugin_file ) {
+                        ## Plugin is a file, add it to list for processing
                         my $sig = File::Spec->catfile( $plugin_dir, $file );
-                        # Plugin is a file, add it to list for processing
                         push @{ $plugins{$type} }, {
                             label => $label,              # used only by packs
                             id    => lc($label),          # used only by packs
@@ -1900,26 +1931,6 @@ sub ping {
                   };
             }
         }
-        if ( $blog->mt_update_key ) {
-            require MT::XMLRPC;
-            if ( MT::XMLRPC->mt_ping($blog) ) {
-                push @res,
-                  {
-                    good => 1,
-                    url  => $mt->{cfg}->MTPingURL,
-                    type => "update"
-                  };
-            }
-            else {
-                push @res,
-                  {
-                    good  => 0,
-                    url   => $mt->{cfg}->MTPingURL,
-                    type  => "update",
-                    error => MT::XMLRPC->errstr
-                  };
-            }
-        } ## end if ( $blog->mt_update_key)
     } ## end if ( $send_updates && ...)
 
     my $cfg     = $mt->{cfg};
@@ -2062,7 +2073,6 @@ sub needs_ping {
     {
         my @updates = $mt->update_ping_list($blog);
         @list{@updates} = (1) x @updates;
-        $list{ $mt->{cfg}->MTPingURL } = 1 if $blog && $blog->mt_update_key;
     }
     if ($entry) {
         @list{ @{ $entry->to_ping_url_list } } = ();
@@ -2249,13 +2259,6 @@ sub supported_languages {
     }
     \%langs;
 } ## end sub supported_languages
-
-# For your convenience
-sub trans_error {
-    my $app = shift;
-    return $app->error( $app->translate(@_) );
-}
-*errtrans = \&trans_error;
 
 sub all_text_filters {
     unless (%Text_filters) {
@@ -2779,36 +2782,38 @@ sub get_next_sched_post_for_user {
     return $next_sched_utc;
 } ## end sub get_next_sched_post_for_user
 
-our %Commenter_Auth;
+{
+    our %Commenter_Auth;
 
-sub init_commenter_authenticators {
-    my $self = shift;
-    my $auths = $self->registry("commenter_authenticators") || {};
-    %Commenter_Auth = %$auths;
-    my $app = $self->app;
-    my $blog = $app->blog if $app->isa('MT::App');
-    foreach my $auth ( keys %$auths ) {
-        if ( my $c = $auths->{$auth}->{condition} ) {
-            $c = $self->handler_to_coderef($c);
-            if ($c) {
-                delete $Commenter_Auth{$auth} unless $c->($blog);
+    sub init_commenter_authenticators {
+        my $self = shift;
+        my $auths = $self->registry("commenter_authenticators") || {};
+        %Commenter_Auth = %$auths;
+        my $app = $self->app;
+        my $blog = $app->blog if $app->isa('MT::App');
+        foreach my $auth ( keys %$auths ) {
+            if ( my $c = $auths->{$auth}->{condition} ) {
+                $c = $self->handler_to_coderef($c);
+                if ($c) {
+                    delete $Commenter_Auth{$auth} unless $c->($blog);
+                }
             }
         }
+        $Commenter_Auth{$_}{key} ||= $_ for keys %Commenter_Auth;
     }
-    $Commenter_Auth{$_}{key} ||= $_ for keys %Commenter_Auth;
-}
 
-sub commenter_authenticator {
-    my $self = shift;
-    my ($key) = @_;
-    %Commenter_Auth or $self->init_commenter_authenticators();
-    return $Commenter_Auth{$key};
-}
+    sub commenter_authenticator {
+        my $self = shift;
+        my ($key) = @_;
+        %Commenter_Auth or $self->init_commenter_authenticators();
+        return $Commenter_Auth{$key};
+    }
 
-sub commenter_authenticators {
-    my $self = shift;
-    %Commenter_Auth or $self->init_commenter_authenticators();
-    return values %Commenter_Auth;
+    sub commenter_authenticators {
+        my $self = shift;
+        %Commenter_Auth or $self->init_commenter_authenticators();
+        return values %Commenter_Auth;
+    }
 }
 
 sub _commenter_auth_params {
@@ -2895,40 +2900,6 @@ LiveJournal
             logo              => 'images/comment/signin_livejournal.png',
             logo_small        => 'images/comment/livejournal_logo.png',
             order             => 11,
-        },
-        'Vox' => {
-            class      => 'MT::Auth::Vox',
-            label      => 'Vox',
-            login_form => <<Vox,
-<form method="post" action="<mt:var name="script_url">">
-<input type="hidden" name="__mode" value="login_external" />
-<input type="hidden" name="blog_id" value="<mt:var name="blog_id">" />
-<input type="hidden" name="entry_id" value="<mt:var name="entry_id">" />
-<input type="hidden" name="static" value="<mt:var name="static" escape="html">" />
-<input type="hidden" name="key" value="Vox" />
-<fieldset>
-<mtapp:setting
-    id="vox_display"
-    label="<__trans phrase="Your Vox Blog URL">">
-http:// <input name="openid_userid" style="background: #fff url('<mt:var name="static_uri">images/comment/vox_logo.png') no-repeat 2px center; padding: 2px 2px 2px 20px; border: 1px solid #5694b6; width: 200px; font-size: 110%; vertical-align: middle" />.vox.com
-</mtapp:setting>
-<div class="actions-bar actions-bar-login">
-    <div class="actions-bar-inner pkg actions">
-        <button
-            type="submit"
-            class="primary-button"
-            ><__trans phrase="Sign in"></button>
-    </div>
-</div>
-<p><img src="<mt:var name="static_uri">images/comment/blue_moreinfo.png"> <a href="http://www.vox.com/"><__trans phrase="Learn more about Vox."></a></p>
-</fieldset>
-</form>
-Vox
-            login_form_params => \&_commenter_auth_params,
-            condition         => \&_openid_commenter_condition,
-            logo              => 'images/comment/signin_vox.png',
-            logo_small        => 'images/comment/vox_logo.png',
-            order             => 12,
         },
         'Google' => {
             label      => 'Google',
@@ -3173,7 +3144,7 @@ LIVEDOOR
 <input type="hidden" name="key" value="Hatena" />
 <fieldset>
 <mtapp:setting
-    id="vox_display"
+    id="hatena_display"
     label="<__trans phrase="Your Hatena ID">">
 <input name="openid_userid" style="background: #fff url('<mt:var name="static_uri">images/comment/hatena_logo.png') no-repeat 2px center; padding: 2px 2px 2px 20px; border: 1px solid #5694b6; width: 200px; font-size: 110%; vertical-align: middle" />
 </mtapp:setting>
@@ -3197,26 +3168,6 @@ HATENA
     };
 } ## end sub core_commenter_authenticators
 
-our %Captcha_Providers;
-
-sub captcha_provider {
-    my $self = shift;
-    my ($key) = @_;
-    $self->init_captcha_providers() unless %Captcha_Providers;
-    return $Captcha_Providers{$key};
-}
-
-sub captcha_providers {
-    my $self = shift;
-    $self->init_captcha_providers() unless %Captcha_Providers;
-    my $def  = delete $Captcha_Providers{'mt_default'};
-    my @vals = values %Captcha_Providers;
-    if ( defined($def) && $def->{condition}->() ) {
-        unshift @vals, $def;
-    }
-    @vals;
-}
-
 sub core_captcha_providers {
     return {
         'mt_default' => {
@@ -3233,16 +3184,38 @@ sub core_captcha_providers {
     };
 }
 
-sub init_captcha_providers {
-    my $self = shift;
-    my $providers = $self->registry("captcha_providers") || {};
-    foreach my $provider ( keys %$providers ) {
-        delete $providers->{$provider}
-          if exists( $providers->{$provider}->{condition} )
-              && !( $providers->{$provider}->{condition}->() );
+{
+    our %Captcha_Providers;
+
+    sub captcha_provider {
+        my $self = shift;
+        my ($key) = @_;
+        $self->init_captcha_providers() unless %Captcha_Providers;
+        return $Captcha_Providers{$key};
     }
-    %Captcha_Providers = %$providers;
-    $Captcha_Providers{$_}{key} ||= $_ for keys %Captcha_Providers;
+
+    sub captcha_providers {
+        my $self = shift;
+        $self->init_captcha_providers() unless %Captcha_Providers;
+        my $def  = delete $Captcha_Providers{'mt_default'};
+        my @vals = values %Captcha_Providers;
+        if ( defined($def) && $def->{condition}->() ) {
+            unshift @vals, $def;
+        }
+        @vals;
+    }
+
+    sub init_captcha_providers {
+        my $self = shift;
+        my $providers = $self->registry("captcha_providers") || {};
+        foreach my $provider ( keys %$providers ) {
+            delete $providers->{$provider}
+              if exists( $providers->{$provider}->{condition} )
+                  && !( $providers->{$provider}->{condition}->() );
+        }
+        %Captcha_Providers = %$providers;
+        $Captcha_Providers{$_}{key} ||= $_ for keys %Captcha_Providers;
+    }
 }
 
 sub effective_captcha_provider {
@@ -3519,10 +3492,10 @@ L<ERROR HANDLING> for more information.
 Constructs a new I<MT> instance and returns that object. Returns C<undef>
 on failure.
 
-I<new> will also read your MT configuration file (provided that it can find it--if
-you find that it can't, take a look at the I<Config> directive, below). It
-will also initialize the chosen object driver; the default is the C<DBM>
-object driver.
+I<new> will also read your MT configuration file (provided that it can
+find it--if you find that it can't, take a look at the I<Config> directive,
+below). It will also initialize the chosen object driver; the default is the
+C<DBM> object driver.
 
 I<%args> can contain:
 
@@ -3532,8 +3505,8 @@ I<%args> can contain:
 
 Path to the MT configuration file.
 
-If you do not specify a path, I<MT> will try to find your MT configuration file
-in the current working directory.
+If you do not specify a path, I<MT> will try to find your MT configuration
+file in the current working directory.
 
 =item * Directory
 
@@ -3659,7 +3632,7 @@ to, and configures Data::Dumper with these settings:
 
 =head2 $mt->init_lang_defaults(%param)
 
-Sets the default language to english if none specified and initializes the 
+Sets the default language to english if none specified and initializes the
 following config directives based upon the current language setting:
 
     NewsboxURL, LearningNewsURL, SupportURL, NewsURL, DefaultTimezone,
@@ -3752,7 +3725,8 @@ See the L<MT::Request> package for more information.
 =head2 MT->new_ua
 
 Returns a new L<LWP::UserAgent> instance that is configured according to the
-Movable Type configuration settings (specifically C<HTTPInterface>, C<HTTPTimeout>, C<HTTPProxy> and C<HTTPNoProxy>). The agent string is set
+Movable Type configuration settings (specifically C<HTTPInterface>,
+C<HTTPTimeout>, C<HTTPProxy> and C<HTTPNoProxy>). The agent string is set
 to "MovableType/(version)" and is also limited to receiving a response of
 100,000 bytes by default (you can override this by using the 'max_size'
 method on the returned instance). Using this method is recommended for
@@ -3961,7 +3935,7 @@ Removes a callback that was previously registered.
 =head2 MT->register_callbacks([...])
 
 Registers several callbacks simultaneously. Each element in the array
-parameter given should be a hashref containing these elements: C<name>, 
+parameter given should be a hashref containing these elements: C<name>,
 C<priority>, C<plugin> and C<code>.
 
 =head2 MT->run_callbacks($meth[, $arg1, $arg2, ...])
@@ -4046,6 +4020,8 @@ hashes and returns them. See L<MT::Component> for further details.
 =head2 MT->component( $id )
 
 Returns a loaded L<MT::Component> based on the requested C<$id> parameter.
+See  L<MT::Component> and L<MT::Plugin> for details specific to each class.
+
 For example:
 
     # Returns the MT 'core' component
@@ -4053,14 +4029,26 @@ For example:
 
 =head2 MT->model( $id )
 
-Returns a Perl package name for the MT object type identified by C<$id>.
-For example:
+Returns the Perl package name listed in the registry as being the class of
+record for a particular object type identified by C<$id>.  For example:
 
     # Assigns (by default) 'MT::Blog' to $blog_class
     my $blog_class = MT->model('blog');
 
-It is a recommended practice to utilize the model method to derive the
-implementation package name, instead of hardcoding Perl package names.
+Additionally, for your convenience, the system does an eval'd require on the
+module before returning making the following familiar algorithm obsolete:
+
+    require MT::Entry;
+    my $entry_iter = MT::Entry->load_iter( $terms, $args );
+
+With C<model()>, you do it this way:
+
+    my $entry_iter = $app->model('entry')->load_iter( $terms, $args );
+
+It is B<highly> recommended that unless you have a reason to call for a
+specific class, you should rely on C<model()> to derive the implementation
+package name as this allows for dynamic modification of object type classes
+by plugins and even core code.
 
 =head2 MT->models( $id )
 
@@ -4073,27 +4061,38 @@ with it:
 
 =head2 MT->product_code
 
-The product code identifying the Movable Type product that is installed.
-This is either 'MTE' for Movable Type Enterprise or 'MT' for the
-non-Enterprise product.
+A short two- or three-letter code indicating the specific product you are
+using. For example, Melody uses C<OM>, Movable Type uses C<MT> and Movable
+Type Enterprise uses C<MTE>. These generally do not change once in use.
 
 =head2 MT->product_name
 
-The name of the Movable Type product that is installed. This is either
-'Movable Type Enterprise' or 'Movable Type Publishing Platform'.
+The name of the Movable Type-family product that is installed. Examples:
+"Melody", 'Movable Type Enterprise' and 'Movable Type Publishing Platform'.
 
 =head2 MT->product_version
 
-The version number of the product. This is different from the C<version_id>
-and C<version_number> methods as they report the API version information.
+The official version number of the product as represented by a "dotted decimal
+version string" like "v1.0.2".
+
+This is a special format defined and recognized by the L<version> module which
+assists in translating between the many different historical version number
+formats Perl modules have used in the past.
 
 =head2 MT->VERSION
 
-Returns the API version of MT. When using the MT module with the version
-requirement, this method will also load the suitable API 'compatibility'
-module, if available. For instance, if your plugin declares:
+=head2 MT->version_number
 
-    use MT 4;
+Both of these methods return the API version of product which indicates the
+API compatibility level between different Movable Type-related products. All
+products with the same VERSION should offer a seamless plugin compatibility
+experience when switching from one to the other.
+
+When using the MT module with the version requirement, this method will also
+load the suitable API 'compatibility' module, if available. For instance, if
+your plugin declares:
+
+    use MT 4.2;
 
 Then, once MT 5 is available, that statement will cause the C<VERSION> method
 to attempt to load a module named "MT::Compat::v4". This module would contain
@@ -4101,13 +4100,10 @@ compatibility support for MT 4-based plugins.
 
 =head2 MT->version_id
 
-Returns the API version of MT (including any beta/alpha designations).
-
-=head2 MT->version_number
-
-Returns the numeric API version of MT (without any beta/alpha designations).
-For example, if I<version_id> returned C<2.5b1>, I<version_number> would
-return C<2.5>.
+Returns the "display version" for the specific release of an MT product
+(including any beta/alpha designations). This is the version shown in the
+footer of the application with some additions based on the components you
+have installed.
 
 =head2 MT->schema_version
 
@@ -4115,9 +4111,9 @@ Returns the version of the MT database schema.
 
 =head2 MT->portal_url
 
-Returns the URL to the product's homepage. 
+Returns the URL to the product's homepage.
 
-I<Historical note: The term "portal" emerged from TypePad in an era in which 
+I<Historical note: The term "portal" emerged from TypePad in an era in which
 TypePad was whitelabeled for numerous sites. Each one of these whitelabeled
 sites was called a "portal" and each portal had a unique homepage which was
 NOT typepad.com. The term persists within Movable Type and Melody today.>
@@ -4179,10 +4175,10 @@ constructor.
 
 =head2 $app->load_global_tmpl($args, [, $blog_id])
 
-Loads a L<MT::Template> template using the arguments specified for the 
+Loads a L<MT::Template> template using the arguments specified for the
 specified blog, or the current blog (if an explicit blog has not been
 specified). This method will first check for the specified template among
-the templates belonging to the blog, and if one is not found will fall 
+the templates belonging to the blog, and if one is not found will fall
 back and search the global templates. In other words, "please give me this
 template, and if you can't find it, look for it in the global templates,
 thank you."
@@ -4201,10 +4197,10 @@ configuration setting or the encoding of the active language
 
 =head2 $app->build_page($tmpl_name, \%param)
 
-Builds an application page to be sent to the client; the page name is specified
-in C<$tmpl_name>, which should be the name of a template containing valid
-L<MT::Template> markup. C<\%param> is a hash ref whose keys and values will
-be passed to L<MT::Template::param> for use in the template.
+Builds an application page to be sent to the client; the page name is
+specified in C<$tmpl_name>, which should be the name of a template containing
+valid L<MT::Template> markup. C<\%param> is a hash ref whose keys and values
+will be passed to L<MT::Template::param> for use in the template.
 
 On success, returns a scalar containing the page to be sent to the client. On
 failure, returns C<undef>, and the error message can be obtained from
@@ -4367,9 +4363,9 @@ return a value ending in a /
 
 =head2 $app->support_directory_path()
 
-Returns the file path to the static support directory. This can 
-be set in the mt-config.cgi with the SupportDirectoryPath directive. This method will always
-return a value ending in a /
+Returns the file path to the static support directory. This can
+be set in the mt-config.cgi with the SupportDirectoryPath directive. This
+method will always return a value ending in a /
 
 =head2 MT::core_upload_file_to_sync
 

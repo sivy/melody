@@ -482,7 +482,7 @@ use vars qw( @ISA %Lexicon );
     'Learn more about OpenID' => 'Meer weten over OpenID',
 
 ## default_templates/powered_by.mtml
-    '_MTCOM_URL' => 'http://www.movabletype.com/',
+    '_MTCOM_URL' => 'http://openmelody.org/',
 
 ## default_templates/tag_cloud.mtml
 
@@ -502,10 +502,6 @@ use vars qw( @ISA %Lexicon );
 ## default_templates/recent_assets.mtml
 
 ## default_templates/monthly_entry_listing.mtml
-
-## lib/MT/IPBanList.pm
-    'IP Ban'  => 'IP ban',
-    'IP Bans' => 'IP bans',
 
 ## lib/MT/BasicAuthor.pm
     'authors' => 'auteurs',
@@ -1531,24 +1527,12 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorMonthly.pm
     'AUTHOR-MONTHLY_ADV' => 'per auteur per maand',
-    'author/author-display-name/yyyy/mm/index.html' =>
-      'auteur/getoonde-naam-auteur/jjjj/mm/index.html',
-    'author/author_display_name/yyyy/mm/index.html' =>
-      'auteur/getoonde_naam_auteur/jjjj/mm/index.html',
 
 ## lib/MT/ArchiveType/AuthorWeekly.pm
     'AUTHOR-WEEKLY_ADV' => 'per auteur per week',
-    'author/author-display-name/yyyy/mm/day-week/index.html' =>
-      'auteur/auteur-getoonde-naam/jjjj/mm/dag-week/index.html',
-    'author/author_display_name/yyyy/mm/day-week/index.html' =>
-      'auteur/auteur_getoonde_naam/jjjj/mm/dag-week/index.html',
 
 ## lib/MT/ArchiveType/AuthorDaily.pm
     'AUTHOR-DAILY_ADV' => 'per auteur per dag',
-    'author/author-display-name/yyyy/mm/dd/index.html' =>
-      'auteur/getoonde-auteursnaam/jjjj/mm/dd/index.html',
-    'author/author_display_name/yyyy/mm/dd/index.html' =>
-      'auteur/getoonde_auteursnaam/jjjj/mm/dd/index.html',
 
 ## lib/MT/ArchiveType/Individual.pm
     'INDIVIDUAL_ADV'              => 'per bericht',
@@ -1582,10 +1566,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorYearly.pm
     'AUTHOR-YEARLY_ADV' => 'per auteur per jaar',
-    'author/author-display-name/yyyy/index.html' =>
-      'auteur/auteur-getoonde-naam/jjjj/index.html',
-    'author/author_display_name/yyyy/index.html' =>
-      'auteur/auteur_getoonde_naam/jjjj/index.html',
 
 ## lib/MT/ArchiveType/Monthly.pm
     'MONTHLY_ADV'        => 'per maand',
@@ -1615,10 +1595,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/Author.pm
     'AUTHOR_ADV' => 'per auteur',
-    'author/author-display-name/index.html' =>
-      'auteur/auteur-getoonde-naam/index.html',
-    'author/author_display_name/index.html' =>
-      'auteur/auteur_getoonde_naam/index.html',
 
 ## lib/MT/ArchiveType/CategoryYearly.pm
     'CATEGORY-YEARLY_ADV' => 'per categorie per jaar',
@@ -2357,12 +2333,6 @@ use vars qw( @ISA %Lexicon );
     'Entries must be cloned if trackbacks are cloned' =>
       'Berichten moeten worden gekloond als trackbacks worden gekloond'
     ,                                   # Translate - New
-
-## lib/MT/CMS/BanList.pm
-    'You did not enter an IP address to ban.' =>
-      'U vulde geen IP adres in om te verbannen.',
-    'The IP you entered is already banned for this blog.' =>
-      'Het IP adres dat u opgaf is al verbannen van deze weblog.',
 
 ## lib/MT/CMS/Plugin.pm
     'Plugin Set: [_1]'   => 'Pluginset: [_1]',
@@ -4706,17 +4676,6 @@ use vars qw( @ISA %Lexicon );
     'Action Bars' => 'Actiebalken',
     'Select the location of the entry editor&rsquo;s action bar.' =>
       'Selecteer de locatie voor de actiebalk in de berichteneditor.',
-
-## tmpl/cms/list_banlist.tmpl
-    'IP Banning Settings'            => 'IP-verbanningsinstellingen',
-    'IP addresses'                   => 'IP adressen',
-    'Delete selected IP Address (x)' => 'Verwijder geselecteerd IP adres (s)',
-    'You have added [_1] to your list of banned IP addresses.' =>
-      'U hebt [_1] toegevoegd aan uw lijst met uitgesloten IP adressen.',
-    'You have successfully deleted the selected IP addresses from the list.'
-      => 'U hebt de geselecteerde IP adressen uit de lijst is verwijderd.',
-    'Ban IP Address' => 'Verban IP adres',
-    'Date Banned'    => 'Verbanningsdatum',
 
 ## tmpl/cms/cfg_registration.tmpl
     'Registration Settings' => 'Registratie-instellingen',

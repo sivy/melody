@@ -745,7 +745,7 @@ sub core_upgrade_functions {
                 label     => 'Removing unused template maps...',
                 condition => sub {
                     my $blog = shift;
-                    my @blog_at = split /,/, $blog->archive_type;
+                    my @blog_at = split(/,/, $blog->archive_type);
                     require MT::TemplateMap;
                     MT::TemplateMap->remove(
                         { blog_id => $blog->id, archive_type => \@blog_at },
@@ -957,7 +957,7 @@ sub core_upgrade_functions {
                 code  => sub {
                     my ($blog) = @_;
                     require MT::CMS::Blog;
-                    MT::CMS::Blog::update_publishing_profile( $App, $blog );
+                    MT::CMS::Blog::update_publish_profile( $App, $blog );
                     require MT::Template;
                     require MT::PublishOption;
                     my @tmpls
@@ -2238,7 +2238,7 @@ sub seed_database {
     $comment->blog_id( $blog->id );
     $comment->text(
         MT->translate(
-            "Movable Type also created a comment for me as well so that I could see what a comment will look like on my blog once people start submitting comments on all the posts I will write."
+            "Melody also created a comment for me as well so that I could see what a comment will look like on my blog once people start submitting comments on all the posts I will write."
         )
     );
     $comment->visible(1);
@@ -3945,6 +3945,12 @@ setting, if the existing schema version is 3.2 or earlier (preserves
 =head2 core_upgrade_end
 
 =head2 core_upgrade_functions
+
+This function returns a hash reference which defines the set of
+upgrade functions carried out by Melody for the purpose of managing its own
+tables and data.
+
+It is called by MT::Core in the process of populating the value for the C<upgrade_functions> key of the registry.
 
 =head2 core_upgrade_meta
 
