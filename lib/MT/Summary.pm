@@ -270,11 +270,9 @@ sub summarize {
           : $type_id )
       : $obj->datasource;
     my $registry = MT->registry( summaries => $class_type );
-    my $super_registry = ($type_id ne $obj->datasource) ? MT->registry( summaries => $obj->datasource ) : {};
-    my $regen
+    my $regen 
       = $params{code}
       || $registry->{ $terms->{class} }->{code}
-      || $super_registry->{ $terms->{class} }->{code}
       || die
       "Required code to summarize $terms->{class} is missing in registry for class $class_type/@{[$terms->{class}]}\n";
     $regen = MT->handler_to_coderef($regen) unless ref $regen;
