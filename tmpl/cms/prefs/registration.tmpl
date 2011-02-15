@@ -46,8 +46,9 @@
         </mt:if>
 
         <mt:unless name="typekey_enabled">
-        <div><a href="<mt:var name="script_url">?__mode=cfg_web_services&amp;blog_id=<mt:var name="blog_id" escape="url">"><__trans phrase="Setup TypePad"></a></div>
+            <div><a href="javascript:void(0)" id="lnkTypePad"><__trans phrase="Setup TypePad"></a></div>
         </mt:unless>
+
         <mt:unless name="openid_enabled">
         <p>
         <img src="<mt:var name="static_uri">images/status_icons/warning.gif" alt="<__trans phrase="OpenID providers disabled">" width="9" height="9" />

@@ -481,7 +481,7 @@ use vars qw( @ISA %Lexicon );
     'Learn more about OpenID' => 'Mehr über OpenID erfahren',
 
 ## default_templates/powered_by.mtml
-    '_MTCOM_URL' => 'http://www.movabletype.com/',
+    '_MTCOM_URL' => 'http://openmelody.org/',
 
 ## default_templates/tag_cloud.mtml
 
@@ -500,10 +500,6 @@ use vars qw( @ISA %Lexicon );
 ## default_templates/recent_assets.mtml
 
 ## default_templates/monthly_entry_listing.mtml
-
-## lib/MT/IPBanList.pm
-    'IP Ban'  => 'IP-Sperre',
-    'IP Bans' => 'IP-Sperren',
 
 ## lib/MT/BasicAuthor.pm
     'authors' => 'Autoren',
@@ -1521,24 +1517,12 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorMonthly.pm
     'AUTHOR-MONTHLY_ADV' => 'monatliche Autorenarchive',
-    'author/author-display-name/yyyy/mm/index.html' =>
-      'autor/anzeigename-des-autors/jjjj/mm/index.html',
-    'author/author_display_name/yyyy/mm/index.html' =>
-      'autor/anzeigename_des_autors/jjjj/mm/index.html',
 
 ## lib/MT/ArchiveType/AuthorWeekly.pm
     'AUTHOR-WEEKLY_ADV' => 'wöchentliche Autorenarchive',
-    'author/author-display-name/yyyy/mm/day-week/index.html' =>
-      'autor/anzeigename-des-autors/jjjj/mm/tag-woche/index.html',
-    'author/author_display_name/yyyy/mm/day-week/index.html' =>
-      'autor/anzeigename_des_autors/jjjj/mm/tag-woche/index.html',
 
 ## lib/MT/ArchiveType/AuthorDaily.pm
     'AUTHOR-DAILY_ADV' => 'tägliche Autorenarchive',
-    'author/author-display-name/yyyy/mm/dd/index.html' =>
-      'autor/anzeigename-des-autors/jjjj/mm/tt/index.html',
-    'author/author_display_name/yyyy/mm/dd/index.html' =>
-      'autor/anzeigename_des_autors/jjjj/mm/tt/index.html',
 
 ## lib/MT/ArchiveType/Individual.pm
     'INDIVIDUAL_ADV'                    => 'Einzelarchive',
@@ -1570,10 +1554,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorYearly.pm
     'AUTHOR-YEARLY_ADV' => 'jährliche Autorenarchive',
-    'author/author-display-name/yyyy/index.html' =>
-      'autor/anzeigename-des-autors/jjjj/index.html',
-    'author/author_display_name/yyyy/index.html' =>
-      'autor/anzeigename_des_autors/jjjj/index.html',
 
 ## lib/MT/ArchiveType/Monthly.pm
     'MONTHLY_ADV'        => 'Monatsarchive',
@@ -1603,10 +1583,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/Author.pm
     'AUTHOR_ADV' => 'Autorenarchive',
-    'author/author-display-name/index.html' =>
-      'autor/anzeigename-des-autors/index.html',
-    'author/author_display_name/index.html' =>
-      'autor/anzeigename_des_autors/index.html',
 
 ## lib/MT/ArchiveType/CategoryYearly.pm
     'CATEGORY-YEARLY_ADV' => 'jährliche Kategoriearchive',
@@ -2358,12 +2334,6 @@ use vars qw( @ISA %Lexicon );
     'Entries must be cloned if trackbacks are cloned' =>
       'Zum Klonen von TrackBacks müssen auch die Einträge geklont werden.'
     ,                                                   # Translate - New # OK
-
-## lib/MT/CMS/BanList.pm
-    'You did not enter an IP address to ban.' =>
-      'Keine IP-Adresse angegeben.',
-    'The IP you entered is already banned for this blog.' =>
-      'Die angegebene IP-Adresse ist für dieses Weblog bereits gesperrt.',
 
 ## lib/MT/CMS/Plugin.pm
     'Plugin Set: [_1]'   => 'Plugin-Gruppe: [_1]',
@@ -4705,17 +4675,6 @@ use vars qw( @ISA %Lexicon );
     'Action Bars' => 'Menüleisten',
     'Select the location of the entry editor&rsquo;s action bar.' =>
       'Gewünschte Position der Menüleiste',
-
-## tmpl/cms/list_banlist.tmpl
-    'IP Banning Settings'            => 'IP-Sperren-Einstellungen',
-    'IP addresses'                   => 'IP-Adressen',
-    'Delete selected IP Address (x)' => 'Gewählte IP-Adressen löschen (x)',
-    'You have added [_1] to your list of banned IP addresses.' =>
-      'Sie haben [_1] zur Liste mit gesperrten IP-Adressen hinzugefügt.',
-    'You have successfully deleted the selected IP addresses from the list.'
-      => 'Sie haben die ausgewählten IP-Adressen erfolgreich aus der Liste entfernt.',
-    'Ban IP Address' => 'IP-Adresse sperren',
-    'Date Banned'    => 'gesperrt am',
 
 ## tmpl/cms/cfg_registration.tmpl
     'Registration Settings' => 'Registrierungs-Einstellungen',

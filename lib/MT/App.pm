@@ -1600,7 +1600,6 @@ sub external_authenticators {
 
         if (    $key ne 'TypeKey'
              && $key ne 'OpenID'
-             && $key ne 'Vox'
              && $key ne 'LiveJournal' )
         {
             push @external_authenticators,
@@ -1623,8 +1622,6 @@ sub external_authenticators {
 
     unshift @external_authenticators, $otherauths{'TypeKey'}
       if exists $otherauths{'TypeKey'};
-    unshift @external_authenticators, $otherauths{'Vox'}
-      if exists $otherauths{'Vox'};
     unshift @external_authenticators, $otherauths{'LiveJournal'}
       if exists $otherauths{'LiveJournal'};
     unshift @external_authenticators, $otherauths{'OpenID'}
@@ -2260,15 +2257,7 @@ sub _send_comment_notification {
                                         id      => $comment->id
                               }
           );
-        my $ban_link = $base
-          . $app->uri_params(
-                              'mode' => 'save',
-                              args   => {
-                                        '_type' => 'banlist',
-                                        blog_id => $blog->id,
-                                        ip      => $comment->ip
-                              }
-          );
+
         my %param = (
              blog           => $blog,
              entry          => $entry,
@@ -2276,7 +2265,6 @@ sub _send_comment_notification {
              approve_url    => $approve_link,
              spam_url       => $spam_link,
              edit_url       => $edit_link,
-             ban_url        => $ban_link,
              comment        => $comment,
              unapproved     => !$comment->visible(),
              state_editable => (
@@ -3664,7 +3652,7 @@ sub log {
     # we will turn into a hash reference filling in the
     # defaults for undefined values
     else {
-        $msg = { message => $msg, %defaults };
+        $msg = { %defaults, message => $msg };
     }
 
     # Now, send it on up to the SUPER class
@@ -3914,7 +3902,7 @@ into:
 
     *::template_source
 
-as a wildcard callback name to capture any C<MT::Template> files that are 
+as a wildcard callback name to capture any C<MT::Template> files that are
 loaded regardless of application.
 
 =item <package>::template_param
@@ -3968,7 +3956,7 @@ Example:
 
 =head2 $app->COMMENTER_COOKIE_NAME
 
-This is a static constant/method representing the name of the cookie used for 
+This is a static constant/method representing the name of the cookie used for
 commenters. It is analogous to C<commenter_cookie>.
 
 =head2 $app->commenter_cookie
@@ -4066,7 +4054,7 @@ with the C<validate_magic> method.
 =head2 $app->make_magic_token
 
 Creates a new "magic token" string which is a random set of characters.
-The 
+The
 
 =head2 $app->add_return_arg(%param)
 
@@ -4478,7 +4466,7 @@ http://search.cpan.org/perldoc?CGI
 
 =head2 $app->param_hash (DEPRECATED, FUTURE BREAK)
 
-B<This method will soon change and break existing code. See 
+B<This method will soon change and break existing code. See
 L</"C<< $app->query->Vars >>"> for a forward-compatible replacement.>
 
 =head2 $app->query([ $QUERY_OBJECT ])

@@ -1,12 +1,14 @@
 // Utility Functions
 function handle_edit_click() {
-    var link = $(this).parent().find('a.link');
+    var p = $(this).parent();
+    var link = p.find('a.link');
     if (link.length > 0) {
-        $(this).parent().replaceWith( render_link_form( link.html(), link.attr('href') ) );
+        p.replaceWith( render_link_form( link.html(), link.attr('href') ) );
     } else {
-        $(this).parent().before( render_link_form( '','' ) );
-        $(this).parent().hide();
+        p.before( render_link_form( '','' ) );
+        p.hide();
     }
+    p.parent().find('input.label').focus();
     return false;
 };
 function render_link(label,url) {
@@ -27,6 +29,10 @@ function handle_save_click() {
 function handle_delete_click() {
     $(this).parent().remove(); return false;
 };
+function handle_remove_file() {
+    $(this).parents('.field-content').find('.clear-file').val(1);
+    $(this).parent().remove(); return false;
+};
 function render_link_form(label,url) {
     var dom = '<li class="pkg"><label class="link-text">Label: <input type="text" class="label" value="'+(typeof label != 'undefined' ? label : '')+'" /></label><label class="link-url">URL: <input type="text" class="url" value="'+(typeof url != 'undefined' ? url : '')+'" /></label> <button>Save</button></li>';
     var e = $(dom);
@@ -38,7 +44,7 @@ function render_link_form(label,url) {
                 e.find('button').trigger('click');
                 return false;
             }
-        });
+    });
     }).blur( function() {
         $(this).unbind('keypress');
     });

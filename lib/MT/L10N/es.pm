@@ -792,7 +792,7 @@ use vars qw( @ISA %Lexicon );
       '¡Acabo de finalizar la instalación de [_1] [_2]!',
     'Welcome to my new blog powered by [_1]. This is the first post on my blog and was created for me automatically when I finished the installation process. But that is ok, because I will soon be creating posts of my own!'
       => 'Bienvenido a mi nuevo blog de [_1]. Esta es la primera entrada en mi blog y fue creada automáticamente al finalizar el proceso de instalación. ¡Pronto crearé mis propias entradas!',
-    'Movable Type also created a comment for me as well so that I could see what a comment will look like on my blog once people start submitting comments on all the posts I will write.'
+    'Melody also created a comment for me as well so that I could see what a comment will look like on my blog once people start submitting comments on all the posts I will write.'
       => 'Melody también creo un comentario por mi para ver como lucen los comentarios en mi blog una vez que la gente comience a enviar comentarios en las entradas que escriba.',
     'Can administer the blog.' => 'Puede administrar el blog.',
     'Editor'                   => 'Editor',
@@ -965,12 +965,6 @@ use vars qw( @ISA %Lexicon );
       => 'Si va a crear nuevos usuarios por cada usuario listado en su blog, debe proveer una contraseña.',
     'Importer type [_1] was not found.' =>
       'No se encontró el tipo de importador [_1].',
-
-## lib/MT/CMS/BanList.pm
-    'You did not enter an IP address to ban.' =>
-      'No tecleó una dirección IP para bloquear.',
-    'The IP you entered is already banned for this blog.' =>
-      'La IP que introdujo ya está bloqueada en este blog.',
 
 ## lib/MT/CMS/System.pm
     'Permission denied.' => 'Permiso denegado.',
@@ -1646,10 +1640,6 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/Author.pm
     'AUTHOR_ADV' => 'por autor',
-    'author/author-display-name/index.html' =>
-      'autor/nombre-público-autor/index.html',
-    'author/author_display_name/index.html' =>
-      'autor/nombre-público-autor/index.html',
 
 ## lib/MT/ArchiveType/CategoryMonthly.pm
     'CATEGORY-MONTHLY_ADV' => 'por mes y categoría',
@@ -1678,17 +1668,9 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorMonthly.pm
     'AUTHOR-MONTHLY_ADV' => 'por mes y autor',
-    'author/author-display-name/yyyy/mm/index.html' =>
-      'autor/nombre-público-autor/aaaa/mm/index.html',
-    'author/author_display_name/yyyy/mm/index.html' =>
-      'autor/nombre_público_autor/aaaa/mm/index.html',
 
 ## lib/MT/ArchiveType/AuthorDaily.pm
     'AUTHOR-DAILY_ADV' => 'por día y autor',
-    'author/author-display-name/yyyy/mm/dd/index.html' =>
-      'autor/nombre-público-autor/aaaa/mm/dd/index.html',
-    'author/author_display_name/yyyy/mm/dd/index.html' =>
-      'autor/nombre-público-autor/aaaa/mm/dd/index.html',
 
 ## lib/MT/ArchiveType/Individual.pm
     'INDIVIDUAL_ADV'              => 'por entrada',
@@ -1735,17 +1717,9 @@ use vars qw( @ISA %Lexicon );
 
 ## lib/MT/ArchiveType/AuthorYearly.pm
     'AUTHOR-YEARLY_ADV' => 'por año y autor',
-    'author/author-display-name/yyyy/index.html' =>
-      'autor/nombre-público-autor/aaaa/index.html',
-    'author/author_display_name/yyyy/index.html' =>
-      'author/nombre_público_autor/aaaa/index.html',
 
 ## lib/MT/ArchiveType/AuthorWeekly.pm
     'AUTHOR-WEEKLY_ADV' => 'por semana y autor',
-    'author/author-display-name/yyyy/mm/day-week/index.html' =>
-      'autor/nombre-público-autor/aaaa/mm/día-semana/index.html',
-    'author/author_display_name/yyyy/mm/day-week/index.html' =>
-      'autor/nombre-público-autor/aaaa/mm/día-semana/index.html',
 
 ## lib/MT/Util.pm
     'moments from now'               => 'dentro de unos momentos',
@@ -2042,10 +2016,6 @@ use vars qw( @ISA %Lexicon );
 ## lib/MT/ObjectTag.pm
     'Tag Placement'  => 'Gestión de Etiqueta',
     'Tag Placements' => 'Gestión de las Etiquetas',
-
-## lib/MT/IPBanList.pm
-    'IP Ban'  => 'Bloqueo de IP',
-    'IP Bans' => 'Bloqueos de IP',
 
 ## lib/MT/Log.pm
     'Log message'                 => 'Mensaje del registro',
@@ -3809,17 +3779,6 @@ que la dirección provista es correcta y le pertenece.',
     'Make Backup (b)' => 'Hacer copia (b)',
     'Make Backup'     => 'Hacer copia',
 
-## tmpl/cms/list_banlist.tmpl
-    'IP Banning Settings' => 'Bloqueo de IPs',
-    'IP addresses'        => 'Direcciones IP',
-    'Delete selected IP Address (x)' =>
-      'Borrar la dirección IP seleccionada (x)',
-    'You have added [_1] to your list of banned IP addresses.' =>
-      'Agregó [_1] a su lista de direcciones IP bloqueadas.',
-    'You have successfully deleted the selected IP addresses from the list.'
-      => 'Eliminó correctamente las direcciones IP seleccionadas.',
-    'Ban IP Address' => 'Bloquear la dirección IP',
-
 ## tmpl/cms/preview_entry.tmpl
     'Preview [_1]'          => 'Pre-ver [_1]',
     'Re-Edit this [_1]'     => 'Re-editar [_1]',
@@ -4330,7 +4289,7 @@ que la dirección provista es correcta y le pertenece.',
 ## tmpl/cms/include/sysinfo_content_nav.tmpl
     'Plugins &amp; Addons' => 'Plugins y Addons',
     'Resources'            => 'Recursos',
-    'Sanity Check'         => 'Verificación del sistema ',
+    'System Diagnostics'         => 'Verificación del sistema ',
 
 ## tmpl/cms/include/ping_table.tmpl
     'Publish selected [_1] (p)' => 'Publicar [_1] seleccionados (p)',
@@ -6089,7 +6048,7 @@ que la dirección provista es correcta y le pertenece.',
     'Chooser'                   => 'Chooser',
 
 ## addons/ConfigAssistant.pack/config.yaml
-    'Movable Type Factory Default\'' =>
+    'Factory Default\'' =>
       'Opciones predeterminadas de fábrica\'',
 
 ## addons/ThemeExport.plugin/tmpl/dialog_export.tmpl

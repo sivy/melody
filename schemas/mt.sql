@@ -53,7 +53,6 @@ CREATE TABLE mt_blog (
     blog_ping_weblogs TINYINT,
     blog_ping_blogs TINYINT,
     blog_ping_others TEXT,
-    blog_mt_update_key VARCHAR(30),
     blog_autodiscover_links TINYINT,
     blog_welcome_msg TEXT,
     blog_old_style_archive_links TINYINT,
@@ -142,18 +141,6 @@ CREATE INDEX mt_entry_status ON mt_entry (entry_status);
 CREATE INDEX mt_entry_author_id ON mt_entry (entry_author_id);
 CREATE INDEX mt_entry_created_on ON mt_entry (entry_created_on);
 CREATE INDEX mt_entry_basename ON mt_entry (entry_basename);
-
-CREATE TABLE mt_ipbanlist (
-    ipbanlist_id INTEGER SERIAL PRIMARY KEY,
-    ipbanlist_blog_id INTEGER NOT NULL,
-    ipbanlist_ip VARCHAR(15) NOT NULL,
-    ipbanlist_created_on TIMESTAMP NOT NULL,
-    ipbanlist_modified_on TIMESTAMP NOT NULL,
-    ipbanlist_created_by INTEGER,
-    ipbanlist_modified_by INTEGER
-);
-CREATE INDEX mt_ipbanlist_blog_id ON mt_ipbanlist (ipbanlist_blog_id);
-CREATE INDEX mt_ipbanlist_ip ON mt_ipbanlist (ipbanlist_ip);
 
 CREATE TABLE mt_log (
     log_id INTEGER SERIAL PRIMARY KEY,
